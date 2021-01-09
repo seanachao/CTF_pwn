@@ -1,0 +1,11 @@
+*.*
+*
+!*/
+!/stand/*.py
+/stand/pwndbg
+!/IO_FILE/*.c
+!/*.c
+!/*.h
+!Makefile
+!main.c
+!.gitignore
