@@ -6,6 +6,7 @@
 !/IO_FILE/*.c
 !/*.c
 !/*.h
+!/*.py
 !Makefile
 !main.c
 !.gitignore
