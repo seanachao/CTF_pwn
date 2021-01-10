@@ -24,7 +24,7 @@ void show_notes_func(){
     printf("Welcome use the notes\n");
     printf("1. add your note\n");
     printf("2. del your note\n");
-    printf("3. modify the tips\n");
+    printf("3. edit the note\n");
     printf("4. show the notes\n");
     printf("5. show all tips\n");
     printf("6. exit the note manager\n");
@@ -53,7 +53,7 @@ void del_note(){
 }
 void edit_tips(){
     cur_pr = notes_pr;
-    printf("Please input which id you edit its tip\n");
+    printf("Please input note id\n");
     int id = 0;
     int size = 0;
     scanf("%d %d",&id,&size);
@@ -63,9 +63,10 @@ void edit_tips(){
             if(cur_pr->next->tips == NULL){
                 cur_pr -> next -> tips = malloc(size);
             }
-            printf("Please input your tips for its tip\n");
+            printf("Please input the context\n");
             //read(0,cur_pr->tips,100);
-            scanf("%s",cur_pr->next->tips);
+            //scanf("%s",cur_pr->next->tips);
+            read(0,cur_pr->next->tips,size);
         }
         cur_pr = cur_pr-> next;
     }
@@ -84,7 +85,7 @@ void show_all_tips(){
 void show_note(){
     cur_pr = notes_pr;
     int id = 0;
-    printf("Please input the notes_id\n");
+    printf("Please input the notes id\n");
     //printf("Please input")
    
     scanf("%d",&id);
@@ -121,8 +122,9 @@ void add_note(){
         if(notes[i].num < 0) {
             notes[i].num = id;
             notes[i].context  = malloc(size);   
-            printf("Please input the notes\n");
-            scanf("%s",notes[i].context);
+            printf("Please input the notes brief introduction\n");
+            //scanf("%s",notes[i].context);
+            read(0,notes[i].context,size);
             notes[i].next = NULL;
             cur_pr->next = &notes[i];     
             break;
