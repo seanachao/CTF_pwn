@@ -8,4 +8,5 @@
 !Note/*.py
 !Note/Makefile
 !Note/main.c
+!chunk_manage/*
 !.gitignore
