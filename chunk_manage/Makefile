@@ -1,3 +1,3 @@
 chunk_manage: source/chunk_manage.c source/main.c source/chunk_manage.h
-	gcc source/chunk_manage.c source/main.c source/bins.c -o bin/chunk_manage
+	gcc source/*.c -lreadline  -o bin/chunk_manage
 	patchelf --set-interpreter /usr/local/glibc/glibc2.32/lib/ld-linux-x86-64.so.2 bin/chunk_manage
