@@ -9,5 +9,6 @@
 !Note/Makefile
 !Note/main.c
 !chunk_manage/
+!readme.md
 !*.py
 !.gitignore
